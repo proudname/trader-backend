@@ -1,7 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { ITickerEntity } from '../../types';
 
 @Entity()
-export class TickerEntity {
+export class TickerEntity implements ITickerEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

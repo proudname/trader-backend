@@ -9,7 +9,7 @@ import { TickerService } from '../services/ticker.service';
     type: TickerEntity,
   },
 })
-@Controller(['api', 'catalog', ''])
+@Controller(['api/catalog/tickers'])
 export class TickerController implements CrudController<TickerEntity> {
   constructor(public service: TickerService) {}
 }

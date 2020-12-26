@@ -9,7 +9,7 @@ import { StrategyService } from './strategy.service';
     type: StrategyEntity,
   },
 })
-@Controller(['api', 'strategy'])
+@Controller(['api/strategy'])
 export class StrategyController implements CrudController<StrategyEntity> {
   constructor(public service: StrategyService) {}
 }
