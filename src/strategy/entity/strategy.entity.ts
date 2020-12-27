@@ -1,20 +1,21 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
+import { IStrategyEntity } from '../../types';
+import { BaseEntity } from '../../core/objects/BaseEntity';
 
 @Entity()
-export class StrategyEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class StrategyEntity extends BaseEntity implements IStrategyEntity {
   @Column()
   name: string;
 
   @Column()
   maxAmount: number;
 
-  @OneToOne(() => TickerEntity)
-  @JoinColumn()
-  ticker: TickerEntity;
+  @Column()
+  targetPrice: number;
+
+  @OneToMany(() => TickerEntity, ticker => ticker.id)
+  tickers: number[];
 
   @Column({ default: true })
   isActive: boolean;

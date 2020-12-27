@@ -1,10 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column } from 'typeorm';
 import { ITickerEntity } from '../../types';
+import { BaseEntity } from '../../core/objects/BaseEntity';
 
 @Entity()
-export class TickerEntity implements ITickerEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class TickerEntity extends BaseEntity implements ITickerEntity {
 
   @Column({unique: true})
   code: string;
