@@ -17,6 +17,12 @@ export class StrategyEntity extends BaseEntity implements IStrategyEntity {
   @OneToMany(() => TickerEntity, ticker => ticker.id)
   tickers: number[];
 
-  @Column({ default: true })
+  @Column({ default: false })
   isActive: boolean;
+
+  @Column({ default: new Date(), type: 'timestamp' })
+  cratedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  startedAt?: Date;
 }
