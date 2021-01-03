@@ -8,6 +8,9 @@ export class TickerEntity extends BaseEntity implements ITickerEntity {
   @Column({unique: true})
   code: string;
 
+  @Column({unique: true, nullable: false})
+  figi: string;
+
   @Column()
   companyName: string;
 

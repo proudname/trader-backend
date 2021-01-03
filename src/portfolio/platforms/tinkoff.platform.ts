@@ -14,7 +14,7 @@ export class TinkoffPlatform {
   }
 
   async applySettings() {
-    // await this.api.sandboxClear(); // очищаем песочницу
-    // await this.api.setCurrenciesBalance({ currency: 'USD', balance: 1000 }); // 1000$ на счет
+    await this.api.sandboxClear(); // очищаем песочницу
+    await this.api.setCurrenciesBalance({ currency: 'USD', balance: 1000 }); // 1000$ на счет
   }
 }

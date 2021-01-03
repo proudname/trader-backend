@@ -5,7 +5,7 @@ import { BaseEntity } from '../../core/objects/BaseEntity';
 
 @Entity()
 export class StrategyEntity extends BaseEntity implements IStrategyEntity {
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
@@ -14,8 +14,9 @@ export class StrategyEntity extends BaseEntity implements IStrategyEntity {
   @Column()
   targetPrice: number;
 
-  @OneToMany(() => TickerEntity, ticker => ticker.id)
-  tickers: number[];
+  @OneToOne(() => TickerEntity, ticker => ticker.id)
+  @JoinColumn({ name: 'ticker_id' })
+  ticker: number|TickerEntity;
 
   @Column({ default: false })
   isActive: boolean;

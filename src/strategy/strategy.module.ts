@@ -8,6 +8,6 @@ import { StrategyEntity } from './entity/strategy.entity';
   imports: [TypeOrmModule.forFeature([StrategyEntity])],
   controllers: [StrategyController],
   providers: [StrategyService],
-  exports: [StrategyService]
+  exports: [StrategyService, TypeOrmModule]
 })
 export class StrategyModule {}
