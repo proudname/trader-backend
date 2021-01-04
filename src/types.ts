@@ -1,7 +1,7 @@
 import { TickerEntity } from './catalog/entity/ticker.entity';
-import { Column, JoinColumn, ManyToOne } from 'typeorm';
 import { StrategyEntity } from './strategy/entity/strategy.entity';
-import { KeyPointStatus, KeyPointType } from './enums';
+import { DecideEnum, KeyPointStatus, KeyPointType } from './enums';
+
 
 export interface IBaseEntity {
   id: number
@@ -82,10 +82,12 @@ export type TinkoffInstrumentInfoMessage = {
   limit_down: 130.1
 }
 
-export type RangePrice = {
-  from: number,
-  to: number
+export type DecisionNothingResult = {
+  action: DecideEnum.DO_NOTHING
 }
-export type ExactPrice = {
 
-}
+export type DecisionResult = {
+  action: DecideEnum,
+  qty: number
+}|DecisionNothingResult
+

@@ -1,5 +1,5 @@
-import { Entity, Column, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { IKeyPointEntity, IStrategyEntity } from '../../types';
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { IKeyPointEntity } from '../../types';
 import { BaseEntity } from '../../core/objects/BaseEntity';
 import { StrategyEntity } from './strategy.entity';
 import { KeyPointType } from '../../enums';
@@ -9,6 +9,9 @@ export class KeyPointEntity extends BaseEntity implements IKeyPointEntity {
 
   @Column()
   prc: number;
+
+  @Column()
+  qty: number;
 
   @Column()
   status: number;
