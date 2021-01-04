@@ -115,7 +115,9 @@ export class AnalysisHelper {
   }
 
   async _worker(price: number) {
+    this.logger.detailInfo('Запуск воркера', this.ticker.code)
     const decision = await this.getDecision(price);
+    this.logger.detailInfo('Решение', decision);
     if (decision.action === DecideEnum.DO_NOTHING) return;
     const { api, ticker } = this;
     const { commission, orderId } = await api.limitOrder({
@@ -124,8 +126,7 @@ export class AnalysisHelper {
       lots: decision.qty,
       price: price,
     });
-    console.log(commission); // Комиссия за сделку
-    await api.cancelOrder({ orderId }); // Отменяем заявку
+    this.logger.detailInfo('Коммисия за сделку', commission);
   }
 
 }

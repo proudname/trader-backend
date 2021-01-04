@@ -25,8 +25,7 @@ import { StrategyModule } from '../strategy/strategy.module';
 })
 export class TradeModule {
   constructor(@InjectQueue('portfolio') private portfolioProcessor: Queue, private tradeService: TradeService) {
-    this.startTickerLoad();
-    setTimeout(() => this.startPortfolioMonitor(), 5000);
+    // this.startTickerLoad();
   }
 
   startTickerLoad() {
@@ -35,9 +34,5 @@ export class TradeModule {
         cron: '0 0 */3 * *'
       }
     }).catch(console.error)
-  }
-
-  startPortfolioMonitor() {
-    this.tradeService.portfolioUpdateHandler().catch(console.error)
   }
 }

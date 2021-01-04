@@ -2,7 +2,7 @@ import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { IKeyPointEntity } from '../../types';
 import { BaseEntity } from '../../core/objects/BaseEntity';
 import { StrategyEntity } from './strategy.entity';
-import { KeyPointType } from '../../enums';
+import { KeyPointStatus, KeyPointType } from '../../enums';
 
 @Entity()
 export class KeyPointEntity extends BaseEntity implements IKeyPointEntity {
@@ -13,10 +13,10 @@ export class KeyPointEntity extends BaseEntity implements IKeyPointEntity {
   @Column()
   qty: number;
 
-  @Column()
-  status: number;
+  @Column({default: KeyPointStatus.ACTIVE, enum: KeyPointStatus})
+  status: KeyPointStatus;
 
-  @Column({type: 'timestamp'})
+  @Column({type: 'timestamp', nullable: true})
   executedAt?: Date;
 
   @ManyToOne(() => StrategyEntity, strategy => strategy.id)

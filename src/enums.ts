@@ -6,12 +6,6 @@ export enum DecideEnum {
   DO_NOTHING
 }
 
-export enum DecideEnum {
-  BUY,
-  SELL,
-  DO_NOTHING
-}
-
 
 export enum WorkerTypeEnum {
   CANDLE,

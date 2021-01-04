@@ -1,5 +1,3 @@
-import { TickerEntity } from './catalog/entity/ticker.entity';
-import { StrategyEntity } from './strategy/entity/strategy.entity';
 import { DecideEnum, KeyPointStatus, KeyPointType } from './enums';
 
 
@@ -18,7 +16,7 @@ export interface IStrategyEntity extends IBaseEntity {
   name: string;
   maxAmount: number;
   targetPrice: number;
-  ticker: number|TickerEntity;
+  ticker: number|ITickerEntity;
   isActive: boolean;
   cratedAt: Date;
   startedAt?: Date;
@@ -28,7 +26,7 @@ export interface IKeyPointEntity extends IBaseEntity {
   prc: number;
   status: KeyPointStatus;
   executedAt?: Date;
-  strategy: number|StrategyEntity;
+  strategy: number|IStrategyEntity;
   type: KeyPointType;
 }
 
@@ -90,4 +88,23 @@ export type DecisionResult = {
   action: DecideEnum,
   qty: number
 }|DecisionNothingResult
+
+export interface ICreateStrategyKeyPoint {
+  id?: number;
+  prc: number;
+  qty: number;
+  status: KeyPointStatus;
+  type: KeyPointType
+  modified?: boolean
+}
+
+export interface ICreateStrategyDto {
+  id?: number;
+  name: string;
+  maxAmount: number;
+  targetPrice: number;
+  ticker: number;
+  isActive: boolean;
+  keyPoints: ICreateStrategyKeyPoint[]
+}
 
