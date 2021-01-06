@@ -8,8 +8,15 @@ import { TinkoffPlatform } from '../../portfolio/platforms/tinkoff.platform';
 import { AnalysisHelper } from '../helpers/analysis.helper';
 import { KeyPointEntity } from '../entity/key-point.entity';
 import { Connection, Repository } from 'typeorm';
-import { ICreateStrategyDto } from '../../types';
+import { DecisionActionResult, DecisionResult, ICreateStrategyDto, TinkoffInstrumentInfoMessage } from '../../types';
 import { InternalException } from '../../core/exceptions/internal.exception';
+import { DecideEnum, KeyPointStatus, KeyPointType } from '../../enums';
+import { setDefaults } from '../../core/utils/func.util';
+import { getSumByPercent } from '../../core/utils/math.util';
+import _ from 'lodash';
+import { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
@@ -19,6 +26,7 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
   constructor(
     @InjectRepository(StrategyEntity) private strategyRepository: Repository<StrategyEntity>,
     @InjectRepository(KeyPointEntity) private keyPointRepository: Repository<KeyPointEntity>,
+    @InjectQueue('keypoints') private keyPointsProcessor: Queue,
     private connection: Connection,
     private tinkoffPlatform: TinkoffPlatform) {
       super(strategyRepository);
@@ -44,34 +52,137 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
           ok: 1
         }
       } catch (err) {
-        // since we have errors lets rollback the changes we made
         this.logger.detailErr('Ошибка при сохранении новой стратегии', err);
         await queryRunner.rollbackTransaction();
         throw new InternalException('Ошибка при сохранении');
       } finally {
-        // you need to release a queryRunner which was manually instantiated
         await queryRunner.release();
       }
   }
 
-  async startTracking() {
-    const strategies = await this.strategyRepository
+  async getDecision(keyPoints: KeyPointEntity[], targetPrice: number, averagePrice: number): Promise<DecisionResult> {
+    const sortedKeyPoints: {[key: string]: KeyPointEntity[]} = _.groupBy(keyPoints, 'type');
+    const orDefault = setDefaults([]);
+    if (averagePrice > targetPrice) {
+      const takeProfit = orDefault(sortedKeyPoints[KeyPointType.TAKE_PROFIT]);
+      return this._getTakeProfitDecision(takeProfit, targetPrice, averagePrice); //todo: переделать красиво
+    } else if (averagePrice < targetPrice) {
+      const stopLoss = orDefault(sortedKeyPoints[KeyPointType.STOP_LOSS]);
+      return this._getStopLossDecision(stopLoss, targetPrice, averagePrice);
+    }
+    return {
+      action: DecideEnum.DO_NOTHING
+    }
+  }
+
+
+  _getStopLossDecision(keyPoints: KeyPointEntity[], targetPrice: number, averagePrice: number): DecisionResult {
+    const stopLossActionData = keyPoints.filter(lossPoint => {
+      const sum = getSumByPercent(targetPrice, lossPoint.prc);
+      return sum >= averagePrice;
+    });
+    if (stopLossActionData.length) {
+      const sellCount = stopLossActionData.reduce((a, b) => a + b.qty, 0);
+      if (sellCount > 0) {
+        return {
+          action: DecideEnum.BUY,
+          qty: sellCount,
+          keyPoints: stopLossActionData
+        }
+      }
+    }
+    return {
+      action: DecideEnum.DO_NOTHING
+    }
+  }
+
+  _getTakeProfitDecision(keyPoints: KeyPointEntity[], targetPrice: number, averagePrice: number): DecisionResult {
+    const takeProfitActionData = keyPoints.filter(takePoint => {
+      const sum = getSumByPercent(targetPrice, takePoint.prc);
+      return sum <= averagePrice;
+    });
+    if (takeProfitActionData.length) {
+      const buyCount = takeProfitActionData.reduce((a, b) => a + b.qty, 0);
+      if (buyCount > 0) {
+        return {
+          action: DecideEnum.SELL,
+          qty: buyCount,
+          keyPoints: takeProfitActionData
+        }
+      }
+    }
+    return {
+      action: DecideEnum.DO_NOTHING
+    }
+  }
+
+  async loadActiveKeyPoints(strategyId: number) {
+    return this.keyPointRepository.find({
+      where: {
+        strategy: strategyId,
+        status: KeyPointStatus.ACTIVE
+      }
+    });
+  }
+
+  async loadActiveStrategies() {
+    return this.strategyRepository
       .createQueryBuilder('s')
       .leftJoinAndSelect('s.ticker', 't')
       .where('s.isActive = TRUE')
       .getMany();
-    for (const {ticker,  ...strategy} of strategies) {
-      if (ticker instanceof TickerEntity) {
-        const keyPoints = await this.keyPointRepository.find({
-          where: {
-            strategy: strategy.id
-          }
-        });
-        const helper = new AnalysisHelper(strategy as StrategyEntity, ticker, keyPoints, this.tinkoffPlatform);
-        await helper.startAnalysis();
-        this.logger.detailInfo(`Запущено отслеживание событий тикера`, ticker.code);
-      }
+  }
+
+  async applyStrategyAction(decision: DecisionActionResult, figi: string, price) {
+    const { api } = this.tinkoffPlatform;
+    return api.limitOrder({
+      figi,
+      operation: decision.action === DecideEnum.BUY ? "Buy" : "Sell",
+      lots: decision.qty,
+      price: price
+    });
+  }
+
+  async applyActionMonitor(strategy: StrategyEntity, price: number, figi: string) {
+    const keyPoints = await this.loadActiveKeyPoints(strategy.id);
+    const decision = await this.getDecision(keyPoints, strategy.targetPrice, price);
+    if (decision.action === DecideEnum.DO_NOTHING) return;
+    const { commission, orderId } = await this.applyStrategyAction(decision, figi, price)
+    for (const keyPoint of decision.keyPoints) {
+      keyPoint.status = KeyPointStatus.EXECUTED;
+      keyPoint.executedAt = new Date();
+      keyPoint.orderId = orderId;
+      await keyPoint.save();
+      this.logger.detailInfo('Решение', decision.action);
     }
+  }
+
+  async _isMarketActive({ figi }) {
+    const { api } = this.tinkoffPlatform;
+    return new Promise((resolve) => api.instrumentInfo({ figi }, (message: TinkoffInstrumentInfoMessage) => {
+      if (message.trade_status === 'normal_trading') {
+        return resolve(true);
+      }
+      return resolve(false)
+    }))
+  }
+
+  async registerCandleMonitor(strategy: StrategyEntity & { ticker: TickerEntity }) {
+    const { api } = this.tinkoffPlatform;
+    const { ticker } = strategy;
+    return api.candle({ figi: ticker.figi, interval: '2min' }, async (candle: CandleStreaming) => {
+        const averagePrice = _.mean([candle.h, candle.l]);
+        const jobs = await this.keyPointsProcessor.getWaitingCount();
+        this.logger.detailInfo('Количество ожидающих задач', jobs);
+        if (jobs > 0) return;
+        this.logger.detailInfo('Добавлена новая задача', jobs);
+        await this.keyPointsProcessor.add({
+          strategy,
+          price: averagePrice,
+          figi: ticker.figi
+        })
+      }
+    )
   }
 
 }

@@ -11,7 +11,7 @@ export class StrategyEntity extends BaseEntity implements IStrategyEntity {
   @Column()
   maxAmount: number;
 
-  @Column()
+  @Column({type: 'decimal', precision: 10, scale: 2})
   targetPrice: number;
 
   @OneToOne(() => TickerEntity, ticker => ticker.id)

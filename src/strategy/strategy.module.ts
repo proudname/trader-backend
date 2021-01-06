@@ -10,27 +10,34 @@ import { KeyPointEntity } from './entity/key-point.entity';
 import { TinkoffPlatform } from '../portfolio/platforms/tinkoff.platform';
 import { KeyPointsService } from './services/key-points.service';
 import { KeyPointsController } from './controllers/key-points.controller';
+import { KeyPointProcessor } from './key-point.processor';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([StrategyEntity, KeyPointEntity]),
     BullModule.registerQueue({
       name: 'strategy'
-    })
+    }),
+    BullModule.registerQueue({
+      name: 'keypoints'
+    }),
   ],
   controllers: [StrategyController, KeyPointsController],
-  providers: [StrategyService, StrategyProcessor, TinkoffPlatform, StrategyProcessor, KeyPointsService],
+  providers: [StrategyService, StrategyProcessor, TinkoffPlatform, KeyPointProcessor, KeyPointsService],
   exports: [StrategyService, TypeOrmModule]
 })
 export class StrategyModule {
-  constructor(@InjectQueue('strategy') private strategyProcessor: Queue) {
-    this.strategyProcessor.empty();
+  constructor(
+    @InjectQueue('strategy') private strategyProcessor: Queue,
+    @InjectQueue('keypoints') private keyPointsProcessor: Queue
+  ) {
+    this.startStrategyMonitor();
   }
 
   startStrategyMonitor() {
     this.strategyProcessor.add('monitor', {}, {
       repeat: {
-        cron: '0 */4 * * *'
+        cron: '*/3 * * * *'
       }
     }).catch(console.error)
   }

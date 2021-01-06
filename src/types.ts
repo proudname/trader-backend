@@ -1,4 +1,5 @@
 import { DecideEnum, KeyPointStatus, KeyPointType } from './enums';
+import { KeyPointEntity } from './strategy/entity/key-point.entity';
 
 
 export interface IBaseEntity {
@@ -84,10 +85,13 @@ export type DecisionNothingResult = {
   action: DecideEnum.DO_NOTHING
 }
 
-export type DecisionResult = {
+export type DecisionActionResult = {
   action: DecideEnum,
-  qty: number
-}|DecisionNothingResult
+  qty: number,
+  keyPoints: KeyPointEntity[]
+}
+
+export type DecisionResult = DecisionActionResult|DecisionNothingResult
 
 export interface ICreateStrategyKeyPoint {
   id?: number;

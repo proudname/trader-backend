@@ -25,7 +25,7 @@ import { StrategyModule } from '../strategy/strategy.module';
 })
 export class TradeModule {
   constructor(@InjectQueue('portfolio') private portfolioProcessor: Queue, private tradeService: TradeService) {
-    // this.startTickerLoad();
+    // this.portfolioProcessor.empty();
   }
 
   startTickerLoad() {
