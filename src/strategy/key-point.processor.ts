@@ -9,7 +9,7 @@ import {
 } from '@nestjs/bull';
 import { Job } from 'bull';
 import { StrategyService } from './services/strategy.service';
-import { ExtraLogger } from '../core/objects/ExtraLogger';
+import { ExtraLogger } from '@rasp/core';
 import { StrategyEntity } from './entity/strategy.entity';
 
 @Processor('keypoints')

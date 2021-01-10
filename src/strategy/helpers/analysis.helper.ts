@@ -5,10 +5,10 @@ import { TinkoffPlatform } from '../../portfolio/platforms/tinkoff.platform';
 import OpenAPI, { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
 import _ from 'lodash';
 import { DecideEnum, KeyPointStatus, KeyPointType } from '../../enums';
-import { ExtraLogger } from '../../core/objects/ExtraLogger';
+import { ExtraLogger } from '@rasp/core';
 import { KeyPointEntity } from '../entity/key-point.entity';
-import { getSumByPercent } from '../../core/utils/math.util';
-import { setDefaults } from '../../core/utils/func.util';
+import { getSumByPercent } from '@rasp/core';
+import { setDefaults } from '@rasp/core';
 
 
 export class AnalysisHelper {

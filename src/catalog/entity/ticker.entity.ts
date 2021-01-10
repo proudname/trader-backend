@@ -1,6 +1,6 @@
 import { Entity, Column } from 'typeorm';
 import { ITickerEntity } from '../../types';
-import { BaseEntity } from '../../core/objects/BaseEntity';
+import { BaseEntity } from '@rasp/core';
 
 @Entity()
 export class TickerEntity extends BaseEntity implements ITickerEntity {

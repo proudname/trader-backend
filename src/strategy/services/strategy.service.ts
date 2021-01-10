@@ -3,16 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { StrategyEntity } from '../entity/strategy.entity';
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
-import { ExtraLogger } from '../../core/objects/ExtraLogger';
+import { ExtraLogger } from '@rasp/core';
 import { TinkoffPlatform } from '../../portfolio/platforms/tinkoff.platform';
 import { AnalysisHelper } from '../helpers/analysis.helper';
 import { KeyPointEntity } from '../entity/key-point.entity';
 import { Connection, Repository } from 'typeorm';
 import { DecisionActionResult, DecisionResult, ICreateStrategyDto, TinkoffInstrumentInfoMessage } from '../../types';
-import { InternalException } from '../../core/exceptions/internal.exception';
+import { InternalException } from '@rasp/core';
 import { DecideEnum, KeyPointStatus, KeyPointType } from '../../enums';
-import { setDefaults } from '../../core/utils/func.util';
-import { getSumByPercent } from '../../core/utils/math.util';
+import { setDefaults } from '@rasp/core';
+import { getSumByPercent } from '@rasp/core';
 import _ from 'lodash';
 import { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
 import { InjectQueue } from '@nestjs/bull';
@@ -153,7 +153,6 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
       keyPoint.executedAt = new Date();
       keyPoint.orderId = orderId;
       await keyPoint.save();
-      this.logger.detailInfo('Решение', decision.action);
     }
   }
 
@@ -167,22 +166,18 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
     }))
   }
 
+
   async registerCandleMonitor(strategy: StrategyEntity & { ticker: TickerEntity }) {
     const { api } = this.tinkoffPlatform;
     const { ticker } = strategy;
-    return api.candle({ figi: ticker.figi, interval: '2min' }, async (candle: CandleStreaming) => {
-        const averagePrice = _.mean([candle.h, candle.l]);
-        const jobs = await this.keyPointsProcessor.getWaitingCount();
-        this.logger.detailInfo('Количество ожидающих задач', jobs);
-        if (jobs > 0) return;
-        this.logger.detailInfo('Добавлена новая задача', jobs);
-        await this.keyPointsProcessor.add({
-          strategy,
-          price: averagePrice,
-          figi: ticker.figi
-        })
-      }
-    )
+    return api.candle({ figi: ticker.figi }, _.throttle(async (candle: CandleStreaming) => {
+      const averagePrice = _.mean([candle.h, candle.l]);
+      await this.keyPointsProcessor.add({
+        strategy,
+        figi: ticker.figi,
+        price: averagePrice,
+      })
+    }, 5000))
   }
 
 }

@@ -1,7 +1,7 @@
 import { OnQueueActive, OnQueueCompleted, OnQueueError, Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import { StrategyService } from './services/strategy.service';
-import { ExtraLogger } from '../core/objects/ExtraLogger';
+import { ExtraLogger } from '@rasp/core';
 import { TickerEntity } from '../catalog/entity/ticker.entity';
 import { StrategyEntity } from './entity/strategy.entity';
 import { InjectRepository } from '@nestjs/typeorm';

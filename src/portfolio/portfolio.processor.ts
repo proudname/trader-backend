@@ -1,7 +1,7 @@
 import { OnQueueActive, OnQueueCompleted, OnQueueError, Process, Processor } from '@nestjs/bull';
 import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { polygonApi } from '../core/utils/api.util';
+import { polygonApi } from '@rasp/core';
 import { ITickerEntity, PolygonTickersResponse } from '../types';
 import { TickerEntity } from '../catalog/entity/ticker.entity';
 import { promisify } from 'util';

@@ -1,6 +1,6 @@
 import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { IKeyPointEntity } from '../../types';
-import { BaseEntity } from '../../core/objects/BaseEntity';
+import { BaseEntity } from '@rasp/core';
 import { StrategyEntity } from './strategy.entity';
 import { KeyPointStatus, KeyPointType } from '../../enums';
 

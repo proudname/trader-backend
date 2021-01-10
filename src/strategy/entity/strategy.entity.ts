@@ -1,7 +1,7 @@
 import { Entity, Column, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
 import { IStrategyEntity } from '../../types';
-import { BaseEntity } from '../../core/objects/BaseEntity';
+import { BaseEntity } from '@rasp/core';
 
 @Entity()
 export class StrategyEntity extends BaseEntity implements IStrategyEntity {

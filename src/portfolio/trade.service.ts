@@ -4,7 +4,7 @@ import { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
 import { Repository } from 'typeorm';
 import { StrategyEntity } from '../strategy/entity/strategy.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ExtraLogger } from '../core/objects/ExtraLogger';
+import { ExtraLogger } from '@rasp/core';
 
 @Injectable()
 export class TradeService {
