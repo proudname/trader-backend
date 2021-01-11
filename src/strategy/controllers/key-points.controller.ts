@@ -5,10 +5,10 @@ import { KeyPointsService } from '../services/key-points.service';
 
 @Crud({
   model: {
-    type: KeyPointEntity,
+    type: KeyPointEntity
   },
 })
-@Controller(['api/key_points'])
+@Controller('api/key_points')
 export class KeyPointsController implements CrudController<KeyPointEntity> {
   constructor(public service: KeyPointsService) {
   }
