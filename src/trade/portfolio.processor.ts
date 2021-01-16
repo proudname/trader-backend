@@ -6,7 +6,6 @@ import { ITickerEntity, PolygonTickersResponse } from '../types';
 import { TickerEntity } from '../catalog/entity/ticker.entity';
 import { promisify } from 'util';
 import { Cache } from 'cache-manager';
-import { start } from 'repl';
 const delay = promisify(setTimeout);
 
 @Processor('portfolio')

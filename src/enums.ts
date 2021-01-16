@@ -21,3 +21,8 @@ export enum KeyPointType {
   STOP_LOSS,
   TAKE_PROFIT
 }
+
+export enum HistoryAction {
+  BUY,
+  SELL
+}

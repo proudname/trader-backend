@@ -19,7 +19,7 @@ export class KeyPointEntity extends BaseEntity implements IKeyPointEntity {
   @Column({type: 'timestamp', nullable: true})
   executedAt?: Date;
 
-  @ManyToOne(() => StrategyEntity, strategy => strategy.id)
+  @ManyToOne(() => StrategyEntity, strategy => strategy.keyPoints)
   @JoinColumn({ name: 'strategy_id' })
   strategy: number|StrategyEntity;
 

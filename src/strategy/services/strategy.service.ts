@@ -3,20 +3,33 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { StrategyEntity } from '../entity/strategy.entity';
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
-import { ExtraLogger } from '@rasp/core';
-import { TinkoffPlatform } from '../../portfolio/platforms/tinkoff.platform';
+import {
+  ExtraLogger,
+  getSumByPercent,
+  InternalException,
+  setDefaults,
+} from '@rasp/core';
+import { TinkoffPlatform } from '../../trade/platforms/tinkoff.platform';
 import { AnalysisHelper } from '../helpers/analysis.helper';
 import { KeyPointEntity } from '../entity/key-point.entity';
 import { Connection, Repository } from 'typeorm';
-import { DecisionActionResult, DecisionResult, ICreateStrategyDto, TinkoffInstrumentInfoMessage } from '../../types';
-import { InternalException } from '@rasp/core';
-import { DecideEnum, KeyPointStatus, KeyPointType } from '../../enums';
-import { setDefaults } from '@rasp/core';
-import { getSumByPercent } from '@rasp/core';
+import {
+  DecisionActionResult,
+  DecisionResult,
+  ICreateStrategyDto,
+  TinkoffInstrumentInfoMessage,
+} from '../../types';
+import {
+  DecideEnum,
+  HistoryAction,
+  KeyPointStatus,
+  KeyPointType,
+} from '../../enums';
 import _ from 'lodash';
 import { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { TradeHistoryEntity } from '../../trade/entity/trade-history.entity';
 
 @Injectable()
 export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
@@ -38,7 +51,11 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       try {
-        const strategyEntity = new StrategyEntity();
+        let strategyEntity = new StrategyEntity();
+        if (data.id) {
+          const exist = await StrategyEntity.findOne(data.id);
+          if (exist) strategyEntity = exist;
+        }
         const filledStrategyEntity = Object.assign(strategyEntity, strategy);
         const strategyRecord = await queryRunner.manager.save<StrategyEntity>(filledStrategyEntity);
         const modifiedKeyPoints = keyPoints.filter(keyPoint => keyPoint.modified);
@@ -58,6 +75,13 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
       } finally {
         await queryRunner.release();
       }
+  }
+
+  async loadStrategyWithPoints(strategyId: number) {
+    return this.strategyRepository.createQueryBuilder('s')
+      .where('s.id = :id', { id: strategyId })
+      .leftJoinAndSelect('s.keyPoints', 'keyPoints')
+      .getOne()
   }
 
   async getDecision(keyPoints: KeyPointEntity[], targetPrice: number, averagePrice: number): Promise<DecisionResult> {
@@ -153,6 +177,11 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
       keyPoint.executedAt = new Date();
       keyPoint.orderId = orderId;
       await keyPoint.save();
+      const historyRecord = new TradeHistoryEntity();
+      historyRecord.strategy = strategy;
+      historyRecord.actionType = decision.action === DecideEnum.BUY ? HistoryAction.BUY : HistoryAction.SELL;
+      historyRecord.price = price;
+      historyRecord.save().catch((err) => this.logger.detailErr('Ошибка при сохранении записи в историю', err))
     }
   }
 

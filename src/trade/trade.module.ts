@@ -7,6 +7,10 @@ import { Queue } from 'bull';
 import { PortfolioProcessor } from './portfolio.processor';
 import * as redisStore from 'cache-manager-redis-store';
 import { StrategyModule } from '../strategy/strategy.module';
+import { TradeHistoryController } from "./controllers/trade-history.controller";
+import { TradeHistoryService } from "./services/trade-history.service";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { TradeHistoryEntity } from "./entity/trade-history.entity";
 
 @Module({
   imports: [
@@ -18,21 +22,10 @@ import { StrategyModule } from '../strategy/strategy.module';
       host: 'localhost',
       port: 6379
     }),
-    StrategyModule
+    StrategyModule,
+    TypeOrmModule.forFeature([TradeHistoryEntity])
   ],
-  providers: [TradeService, TinkoffPlatform, PortfolioProcessor],
-  controllers: [TradeController]
+  providers: [TradeService, TinkoffPlatform, PortfolioProcessor, TradeHistoryService],
+  controllers: [TradeController, TradeHistoryController]
 })
-export class TradeModule {
-  constructor(@InjectQueue('portfolio') private portfolioProcessor: Queue, private tradeService: TradeService) {
-    // this.portfolioProcessor.empty();
-  }
-
-  startTickerLoad() {
-    this.portfolioProcessor.add('load', {}, {
-      repeat: {
-        cron: '0 0 */3 * *'
-      }
-    }).catch(console.error)
-  }
-}
+export class TradeModule {}

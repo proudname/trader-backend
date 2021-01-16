@@ -1,7 +1,9 @@
-import { Entity, Column, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, OneToOne, JoinColumn, ManyToOne, OneToMany, RelationId } from "typeorm";
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
-import { IStrategyEntity } from '../../types';
+import { IKeyPointEntity, IStrategyEntity } from "../../types";
 import { BaseEntity } from '@rasp/core';
+import { KeyPointEntity } from "./key-point.entity";
+import { TradeHistoryEntity } from "../../trade/entity/trade-history.entity";
 
 @Entity()
 export class StrategyEntity extends BaseEntity implements IStrategyEntity {
@@ -14,14 +16,21 @@ export class StrategyEntity extends BaseEntity implements IStrategyEntity {
   @Column({type: 'decimal', precision: 10, scale: 2})
   targetPrice: number;
 
-  @OneToOne(() => TickerEntity, ticker => ticker.id)
+  @ManyToOne(() => TickerEntity)
   @JoinColumn({ name: 'ticker_id' })
   ticker: number|TickerEntity;
+
+  @RelationId((strategy: StrategyEntity) => strategy.ticker)
+  tickerId: number;
+
+  @OneToMany(() => KeyPointEntity, keyPoint => keyPoint.strategy)
+  @JoinColumn()
+  keyPoints: IKeyPointEntity[];
 
   @Column({ default: false })
   isActive: boolean;
 
-  @Column({ default: new Date(), type: 'timestamp' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP', type: 'timestamp' })
   cratedAt: Date;
 
   @Column({ type: 'timestamp', nullable: true })

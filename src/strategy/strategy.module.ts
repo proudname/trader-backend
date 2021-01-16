@@ -7,7 +7,7 @@ import { StrategyProcessor } from './strategy.processor';
 import { BullModule, InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { KeyPointEntity } from './entity/key-point.entity';
-import { TinkoffPlatform } from '../portfolio/platforms/tinkoff.platform';
+import { TinkoffPlatform } from '../trade/platforms/tinkoff.platform';
 import { KeyPointsService } from './services/key-points.service';
 import { KeyPointsController } from './controllers/key-points.controller';
 import { KeyPointProcessor } from './key-point.processor';
@@ -31,7 +31,7 @@ export class StrategyModule {
     @InjectQueue('strategy') private strategyProcessor: Queue,
     @InjectQueue('keypoints') private keyPointsProcessor: Queue
   ) {
-    this.startStrategyMonitor();
+    this.startStrategyMonitor()
   }
 
   startStrategyMonitor() {

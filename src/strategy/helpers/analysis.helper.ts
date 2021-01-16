@@ -1,7 +1,7 @@
 import { StrategyEntity } from '../entity/strategy.entity';
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
 import { DecisionResult, TinkoffInstrumentInfoMessage } from '../../types';
-import { TinkoffPlatform } from '../../portfolio/platforms/tinkoff.platform';
+import { TinkoffPlatform } from '../../trade/platforms/tinkoff.platform';
 import OpenAPI, { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
 import _ from 'lodash';
 import { DecideEnum, KeyPointStatus, KeyPointType } from '../../enums';

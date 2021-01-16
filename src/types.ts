@@ -1,4 +1,4 @@
-import { DecideEnum, KeyPointStatus, KeyPointType } from './enums';
+import { DecideEnum, HistoryAction, KeyPointStatus, KeyPointType } from "./enums";
 import { KeyPointEntity } from './strategy/entity/key-point.entity';
 
 
@@ -18,6 +18,7 @@ export interface IStrategyEntity extends IBaseEntity {
   maxAmount: number;
   targetPrice: number;
   ticker: number|ITickerEntity;
+  keyPoints: IKeyPointEntity[];
   isActive: boolean;
   cratedAt: Date;
   startedAt?: Date;
@@ -29,6 +30,14 @@ export interface IKeyPointEntity extends IBaseEntity {
   executedAt?: Date;
   strategy: number|IStrategyEntity;
   type: KeyPointType;
+}
+
+export interface ITradeHistory extends IBaseEntity {
+  strategy: IStrategyEntity;
+  strategyId: number;
+  actionType: HistoryAction;
+  price: number;
+  actionDate: Date;
 }
 
 export interface IPortfolioItemEntity extends IBaseEntity {
@@ -112,3 +121,11 @@ export interface ICreateStrategyDto {
   keyPoints: ICreateStrategyKeyPoint[]
 }
 
+
+export type PolygonQuery = {
+  page: number,
+  search?: string,
+  apiKey?: string,
+  sort: 'ticker',
+  perpage: number
+}

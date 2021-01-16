@@ -1,18 +1,20 @@
 import { Module, MiddlewareConsumer  } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TradeModule } from './portfolio/trade.module';
+import { TradeModule } from './trade/trade.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StrategyModule } from './strategy/strategy.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { BullModule } from '@nestjs/bull';
-import { AuthMiddleware, AuthModule } from '@rasp/auth';
+import { JwtStrategy, AuthModule, JwtMiddleware } from '@rasp/auth';
 import { UserModule } from '@rasp/user';
 import { KeyPointsController } from './strategy/controllers/key-points.controller';
 import { StrategyController } from './strategy/controllers/strategy.controller';
-import { TradeController } from './portfolio/trade.controller';
+import { TradeController } from './trade/trade.controller';
 import { TickerController } from './catalog/controllers/ticker.controller';
+
+
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { TickerController } from './catalog/controllers/ticker.controller';
     StrategyModule,
     CatalogModule,
     UserModule,
-    AuthModule,
+    AuthModule.register({
+      jwtKey: '123'
+    }),
     BullModule.forRoot({
       redis: {
         host: 'localhost',
@@ -35,9 +39,10 @@ import { TickerController } from './catalog/controllers/ticker.controller';
   exports: [TypeOrmModule]
 })
 export class AppModule {
+
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(AuthMiddleware)
+      .apply(JwtMiddleware)
       .exclude('login')
       .forRoutes(KeyPointsController, StrategyController, TradeController, TickerController);
   }
