@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import OpenAPI from '@tinkoff/invest-openapi-js-sdk';
 import { tinkoffApiUrl, tinkoffSocketUrl, tinkoffSandboxApiUrl } from '../trade.constants';
+import { isProduction } from "../../common/utils/env.utils";
 
 @Injectable()
 export class TinkoffPlatform {
@@ -9,12 +10,26 @@ export class TinkoffPlatform {
   public api: OpenAPI;
 
   constructor() {
-    const { TIN_SANDBOX_KEY } = process.env;
-    this.api = new OpenAPI({ apiURL: tinkoffSandboxApiUrl, secretToken: TIN_SANDBOX_KEY, socketURL: tinkoffSocketUrl });
+    const connectData: any = {
+      socketURL: tinkoffSocketUrl
+    }
+    if (isProduction()) {
+      const { TIN_KEY } = process.env;
+      connectData.apiURL = tinkoffApiUrl;
+      connectData.secretToken = TIN_KEY;
+    } else {
+      const { TIN_SANDBOX_KEY } = process.env;
+      connectData.apiURL = tinkoffSandboxApiUrl;
+      connectData.secretToken = TIN_SANDBOX_KEY;
+    }
+    this.api = new OpenAPI(connectData);
   }
 
   async applySettings() {
-    await this.api.sandboxClear(); // очищаем песочницу
-    await this.api.setCurrenciesBalance({ currency: 'USD', balance: 1000 }); // 1000$ на счет
+    if (!isProduction()) {
+      // todo: нужно ли это тут?
+      await this.api.setCurrenciesBalance({ currency: 'USD', balance: 1000000 });
+      await this.api.setCurrenciesBalance({ currency: 'RUB', balance: 1000000 });
+    }
   }
 }

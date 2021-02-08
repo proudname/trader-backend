@@ -10,7 +10,7 @@ export class StrategyEntity extends BaseEntity implements IStrategyEntity {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({type: 'decimal', precision: 10, scale: 2})
   maxAmount: number;
 
   @Column({type: 'decimal', precision: 10, scale: 2})

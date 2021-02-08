@@ -42,7 +42,6 @@ export class StrategyProcessor {
     const strategies = await this.strategyService.loadActiveStrategies();
     for (const { ticker, ...strategy } of strategies) {
       if (ticker instanceof TickerEntity) {
-        this.logger.detailInfo('Взята в работу стратегия', ticker.code);
         const { figi } = ticker;
         const isTickerActive = await this.strategyService._isMarketActive(ticker);
         if (!isTickerActive) {

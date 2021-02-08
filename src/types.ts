@@ -117,7 +117,7 @@ export interface ICreateStrategyDto {
   maxAmount: number;
   targetPrice: number;
   ticker: number;
-  isActive: boolean;
+  isActive?: boolean;
   keyPoints: ICreateStrategyKeyPoint[]
 }
 
@@ -129,3 +129,4 @@ export type PolygonQuery = {
   sort: 'ticker',
   perpage: number
 }
+

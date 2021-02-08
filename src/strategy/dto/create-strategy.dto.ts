@@ -7,7 +7,7 @@ export class CreateStrategyDto implements ICreateStrategyDto {
   maxAmount: number;
   targetPrice: number;
   ticker: number;
-  isActive: boolean;
+  isActive?: boolean;
   keyPoints: {
     prc: number;
     qty: number;

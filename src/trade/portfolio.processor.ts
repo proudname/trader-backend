@@ -1,11 +1,11 @@
 import { OnQueueActive, OnQueueCompleted, OnQueueError, Process, Processor } from '@nestjs/bull';
 import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { polygonApi } from '@rasp/core';
 import { ITickerEntity, PolygonTickersResponse } from '../types';
 import { TickerEntity } from '../catalog/entity/ticker.entity';
 import { promisify } from 'util';
 import { Cache } from 'cache-manager';
+import { polygonApi } from "../common/utils/api/polygonApi";
 const delay = promisify(setTimeout);
 
 @Processor('portfolio')

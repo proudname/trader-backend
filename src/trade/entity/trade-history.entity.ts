@@ -15,7 +15,7 @@ export class TradeHistoryEntity extends BaseEntity implements ITradeHistory {
   @RelationId((historyEntity: TradeHistoryEntity) => historyEntity.strategy)
   strategyId: number;
 
-  @Column()
+  @Column({ type: "decimal" })
   price: number;
 
   @Column({ enum: HistoryAction })

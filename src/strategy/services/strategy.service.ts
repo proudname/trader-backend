@@ -66,7 +66,8 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
         }
         await queryRunner.commitTransaction();
         return {
-          ok: 1
+          ok: 1,
+          data: strategyRecord
         }
       } catch (err) {
         this.logger.detailErr('Ошибка при сохранении новой стратегии', err);
@@ -157,32 +158,55 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
       .getMany();
   }
 
-  async applyStrategyAction(decision: DecisionActionResult, figi: string, price) {
+  async applyStrategyAction(decision: DecisionActionResult, figi: string, price: number) {
     const { api } = this.tinkoffPlatform;
-    return api.limitOrder({
+    const orderData = {
       figi,
       operation: decision.action === DecideEnum.BUY ? "Buy" : "Sell",
       lots: decision.qty,
-      price: price
-    });
+      price: Math.floor(price * 100) / 100
+    };
+    return api.limitOrder(orderData as any);
+  }
+
+  async validateDecision(decision: DecisionResult, figi: string): Promise<DecisionActionResult|null> {
+    if (decision.action === DecideEnum.DO_NOTHING) return;
+    const { api } = this.tinkoffPlatform;
+    let { qty } = decision;
+    if (decision.action === DecideEnum.SELL) {
+      const instrument = await api.instrumentPortfolio({ figi });
+      if (!instrument) return null;
+      const allowedLots = instrument.blocked ? instrument.lots - instrument.blocked : instrument.lots;
+      if (allowedLots < 1) return null;
+      if (allowedLots < decision.qty) {
+        qty = allowedLots;
+      }
+    }
+    return { ...decision, qty }
   }
 
   async applyActionMonitor(strategy: StrategyEntity, price: number, figi: string) {
-    const keyPoints = await this.loadActiveKeyPoints(strategy.id);
-    const decision = await this.getDecision(keyPoints, strategy.targetPrice, price);
-    if (decision.action === DecideEnum.DO_NOTHING) return;
-    const { commission, orderId } = await this.applyStrategyAction(decision, figi, price)
-    for (const keyPoint of decision.keyPoints) {
-      keyPoint.status = KeyPointStatus.EXECUTED;
-      keyPoint.executedAt = new Date();
-      keyPoint.orderId = orderId;
-      await keyPoint.save();
-      const historyRecord = new TradeHistoryEntity();
-      historyRecord.strategy = strategy;
-      historyRecord.actionType = decision.action === DecideEnum.BUY ? HistoryAction.BUY : HistoryAction.SELL;
-      historyRecord.price = price;
-      historyRecord.save().catch((err) => this.logger.detailErr('Ошибка при сохранении записи в историю', err))
+    try {
+      const keyPoints = await this.loadActiveKeyPoints(strategy.id);
+      const decision = await this.getDecision(keyPoints, strategy.targetPrice, price);
+      const validatedDecision = await this.validateDecision(decision, figi);
+      if (!validatedDecision) return;
+      const { orderId } = await this.applyStrategyAction(validatedDecision, figi, price);
+      for (const keyPoint of validatedDecision.keyPoints) {
+        keyPoint.status = KeyPointStatus.EXECUTED;
+        keyPoint.executedAt = new Date();
+        keyPoint.orderId = orderId;
+        await keyPoint.save();
+        const historyRecord = new TradeHistoryEntity();
+        historyRecord.strategy = strategy;
+        historyRecord.actionType = decision.action === DecideEnum.BUY ? HistoryAction.BUY : HistoryAction.SELL;
+        historyRecord.price = price;
+        historyRecord.save().catch((err) => this.logger.detailErr('Ошибка при сохранении записи в историю', err))
+      }
+    } catch (e) {
+      this.logger.detailErr('Ошибка при обработке стратегии', e);
     }
+
   }
 
   async _isMarketActive({ figi }) {
@@ -199,14 +223,19 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
   async registerCandleMonitor(strategy: StrategyEntity & { ticker: TickerEntity }) {
     const { api } = this.tinkoffPlatform;
     const { ticker } = strategy;
+    await this.tinkoffPlatform.applySettings()
     return api.candle({ figi: ticker.figi }, _.throttle(async (candle: CandleStreaming) => {
-      const averagePrice = _.mean([candle.h, candle.l]);
+      const averagePrice = Number(_.mean([candle.h, candle.l]));
       await this.keyPointsProcessor.add({
         strategy,
         figi: ticker.figi,
-        price: averagePrice,
+        price: averagePrice
       })
     }, 5000))
+  }
+
+  async getDataByTicker(ticker: string) {
+    return this.tinkoffPlatform.api.search({ ticker });
   }
 
 }

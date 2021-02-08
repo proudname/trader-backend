@@ -7,7 +7,7 @@ import { KeyPointStatus, KeyPointType } from '../../enums';
 @Entity()
 export class KeyPointEntity extends BaseEntity implements IKeyPointEntity {
 
-  @Column({type: 'float'}) //todo: изменить на decimal
+  @Column({type: 'decimal'})
   prc: number;
 
   @Column()

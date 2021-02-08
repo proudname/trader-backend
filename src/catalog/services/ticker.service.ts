@@ -2,10 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { TypeOrmCrudService } from "@nestjsx/crud-typeorm";
 import { TickerEntity } from "../entity/ticker.entity";
-import { ExtraLogger, polygonApi } from '@rasp/core';
+import { ExtraLogger } from '@rasp/core';
 import { PolygonQuery, PolygonTicker, PolygonTickersResponse } from '../../types';
 import qs from 'querystring';
 import _ from 'lodash';
+import { polygonApi } from "../../common/utils/api/polygonApi";
 
 @Injectable()
 export class TickerService extends TypeOrmCrudService<TickerEntity> {

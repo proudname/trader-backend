@@ -734,6 +734,23 @@
     rxjs "^6.5.4"
     typeorm "^0.2.29"
 
+"@rasp/core@^0.2.5":
+  version "0.2.5"
+  resolved "https://packages.rapidapps.ru/@rasp%2fcore/-/core-0.2.5.tgz#8043e5fa7173f186f09e85daae8c6a73a56a778e"
+  integrity sha512-TZkUBJJTLJZ4qXhL/ApcHKrJsCNakB30lZ7qIfTzxMed7h4Wm4eIaDUs7vcfU2WhjRnkjI6oLsqBSv2youMZbA==
+  dependencies:
+    "@nestjs/common" "^7.0.0"
+    "@nestjs/core" "^7.0.0"
+    "@nestjs/platform-express" "^7.0.0"
+    "@nestjsx/crud-request" "^4.6.2"
+    axios "^0.21.1"
+    lodash "^4.17.20"
+    mathjs "^8.1.1"
+    reflect-metadata "^0.1.13"
+    rimraf "^3.0.2"
+    rxjs "^6.5.4"
+    typeorm "^0.2.29"
+
 "@rasp/user@^0.0.8":
   version "0.0.8"
   resolved "https://packages.rapidapps.ru/@rasp%2fuser/-/user-0.0.8.tgz#5682bb71ff37066be7f110eb78ac6478049f3c41"
@@ -2019,7 +2036,7 @@ cjs-module-lexer@^0.6.0:
   resolved "https://packages.rapidapps.ru/cjs-module-lexer/-/cjs-module-lexer-0.6.0.tgz#4186fcca0eae175970aee870b9fe2d6cf8d5655f"
   integrity sha512-uc2Vix1frTfnuzxxu1Hp4ktSvM3QaI4oXl4ZUqL1wjTu/BGki9TrCWoqLTg/drR1KwAEarXuRFCG2Svr1GxPFw==
 
-class-transformer@^0.3.1:
+class-transformer@0.3.1, class-transformer@^0.3.1:
   version "0.3.1"
   resolved "https://packages.rapidapps.ru/class-transformer/-/class-transformer-0.3.1.tgz#ee681a5439ff2230fc57f5056412d3befa70d597"
   integrity sha512-cKFwohpJbuMovS8xVLmn8N2AUbAuc8pVo4zEfsUVo8qgECOogns1WVk/FkOZoxhOPTyTYFckuoH+13FO+MQ8GA==
