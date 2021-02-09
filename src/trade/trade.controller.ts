@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { TradeService } from './trade.service';
 
 @Controller('trade')
@@ -11,10 +11,4 @@ export class TradeController {
   portfolio() {
     return this.tradeService.portfolio()
   }
-
-  @Post('portfolio')
-  buy() {
-    return this.tradeService.buy({})
-  }
-
 }
