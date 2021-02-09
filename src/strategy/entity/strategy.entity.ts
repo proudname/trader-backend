@@ -3,7 +3,6 @@ import { TickerEntity } from '../../catalog/entity/ticker.entity';
 import { IKeyPointEntity, IStrategyEntity } from "../../types";
 import { BaseEntity } from '@rasp/core';
 import { KeyPointEntity } from "./key-point.entity";
-import { TradeHistoryEntity } from "../../trade/entity/trade-history.entity";
 
 @Entity()
 export class StrategyEntity extends BaseEntity implements IStrategyEntity {

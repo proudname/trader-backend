@@ -85,6 +85,7 @@ export class StrategyService extends TypeOrmCrudService<StrategyEntity> {
       .getOne()
   }
 
+  // получить "решение" системы, покупать акции или нет
   async getDecision(keyPoints: KeyPointEntity[], targetPrice: number, averagePrice: number): Promise<DecisionResult> {
     const sortedKeyPoints: {[key: string]: KeyPointEntity[]} = _.groupBy(keyPoints, 'type');
     const orDefault = setDefaults([]);

@@ -4,7 +4,7 @@
   "port": 5432,
   "username": "dev",
   "password": "dev",
-  "database": "traderheaven_dev",
+  "database": "db_name",
   "entities": ["dist/**/*.entity{.ts,.js}"],
   "synchronize": true
 }

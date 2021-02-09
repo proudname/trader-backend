@@ -8,6 +8,8 @@ import { Cache } from 'cache-manager';
 import { polygonApi } from "../common/utils/api/polygonApi";
 const delay = promisify(setTimeout);
 
+// раньше использовался для подгрузки всех тикеров в свою базу
+// отказался в пользу менее ресурсозатратного решения
 @Processor('portfolio')
 export class PortfolioProcessor {
 

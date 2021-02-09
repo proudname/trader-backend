@@ -1,16 +1,12 @@
 import {
-  OnQueueActive,
-  OnQueueCompleted,
   OnQueueError, OnQueueFailed,
-  OnQueueStalled,
-  OnQueueWaiting,
   Process,
   Processor,
 } from '@nestjs/bull';
 import { Job } from 'bull';
-import { StrategyService } from './services/strategy.service';
+import { StrategyService } from "../services/strategy.service";
 import { ExtraLogger } from '@rasp/core';
-import { StrategyEntity } from './entity/strategy.entity';
+import { StrategyEntity } from '../entity/strategy.entity';
 
 @Processor('keypoints')
 export class KeyPointProcessor {
@@ -32,6 +28,8 @@ export class KeyPointProcessor {
   }
 
 
+  // при обновлении данных у брокера создается новая задача
+  // в результате выполнения которой акция либо покупается, либо нет
   @Process()
   async apply(job: Job<{strategy: StrategyEntity, price: number, figi: string}>) {
     const { strategy, price, figi } = job.data;

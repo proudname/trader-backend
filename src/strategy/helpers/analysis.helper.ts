@@ -1,14 +1,8 @@
 import { StrategyEntity } from '../entity/strategy.entity';
 import { TickerEntity } from '../../catalog/entity/ticker.entity';
-import { DecisionResult, TinkoffInstrumentInfoMessage } from '../../types';
 import { TinkoffPlatform } from '../../trade/platforms/tinkoff.platform';
-import OpenAPI, { CandleStreaming } from '@tinkoff/invest-openapi-js-sdk';
-import _ from 'lodash';
-import { DecideEnum, KeyPointStatus, KeyPointType } from '../../enums';
+import OpenAPI from '@tinkoff/invest-openapi-js-sdk';
 import { ExtraLogger } from '@rasp/core';
-import { KeyPointEntity } from '../entity/key-point.entity';
-import { getSumByPercent } from '@rasp/core';
-import { setDefaults } from '@rasp/core';
 
 
 export class AnalysisHelper {

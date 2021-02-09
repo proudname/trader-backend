@@ -19,8 +19,8 @@ import { TradeHistoryEntity } from "./entity/trade-history.entity";
     }),
     CacheModule.register({
       store: redisStore,
-      host: 'localhost',
-      port: 6379
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT
     }),
     StrategyModule,
     TypeOrmModule.forFeature([TradeHistoryEntity])

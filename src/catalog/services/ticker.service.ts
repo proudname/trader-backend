@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { TypeOrmCrudService } from "@nestjsx/crud-typeorm";
 import { TickerEntity } from "../entity/ticker.entity";
 import { ExtraLogger } from '@rasp/core';
-import { PolygonQuery, PolygonTicker, PolygonTickersResponse } from '../../types';
+import { PolygonQuery, PolygonTickersResponse } from '../../types';
 import qs from 'querystring';
 import _ from 'lodash';
 import { polygonApi } from "../../common/utils/api/polygonApi";
@@ -16,7 +16,7 @@ export class TickerService extends TypeOrmCrudService<TickerEntity> {
 
   private readonly logger = new ExtraLogger(TickerService.name);
 
-
+  // выгрузка тикеров и получение их в удобном для итерации виде
   async *loadTicker(start: number) {
     const currentPage = start;
     while (currentPage) {
@@ -40,6 +40,7 @@ export class TickerService extends TypeOrmCrudService<TickerEntity> {
     }
   }
 
+  // запрос списка тикеров
   async loadPage(query: PolygonQuery) {
     const defaultQuery: Partial<PolygonQuery> = {
       page: 1,
